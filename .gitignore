@@ -1,5 +1,6 @@
-# Datos locales (cuentas de usuario, base SQLite, registros)
-data/
+# Datos locales (cuentas de usuario, base SQLite, registros): solo la carpeta data/ de la raiz.
+# docs/data/ (fichas publicas de openFDA para la version web) SI se publica.
+/data/
 *.db
 *.db-wal
 *.db-shm
