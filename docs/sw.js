@@ -1,8 +1,8 @@
 // Service worker: la app abre sin conexion. El build sustituye los marcadores de abajo (version y archivos).
-const VERSION = '202610271832';
+const VERSION = '202610271857';
 const SHELL = `shell-${VERSION}`;
 const DATA = 'data-v1';
-const SHELL_FILES = ["./","./index.html","./app.js","./static-api.js","./styles.css","./config.js","./manifest.webmanifest","./shared/derive.mjs","./shared/interactions-core.mjs","./shared/label.mjs","./icons/icon-192.png","./icons/icon-512.png","./icons/apple-touch-icon.png","./data/index.json"];
+const SHELL_FILES = ["./","./index.html","./app.js","./icons.js","./static-api.js","./styles.css","./config.js","./manifest.webmanifest","./shared/derive.mjs","./shared/format.mjs","./shared/interactions-core.mjs","./shared/label.mjs","./icons/icon-192.png","./icons/icon-512.png","./icons/apple-touch-icon.png","./data/index.json"];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));

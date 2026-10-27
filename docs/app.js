@@ -1,3 +1,6 @@
+import { icon } from './icons.js';
+import { formatText } from './shared/format.mjs';
+
 const app = document.getElementById('app');
 // 'static' = version web sin servidor (telefono / GitHub Pages); 'server' = servidor local con login
 const STATIC = window.APP_MODE === 'static';
@@ -42,12 +45,12 @@ const showError = (box, e) => box.replaceChildren(h('div', { class: 'error', rol
 function layout(...content) {
   return [
     h('header', { class: 'topbar' },
-      h('span', { class: 'logo', onclick: () => go('#/') }, '⚕ Farmacopea'),
+      h('span', { class: 'logo', onclick: () => go('#/') }, icon('pill', { size: 22 }), ' Farmacopea'),
       h('nav', {},
-        navBtn('🔍', 'Buscar', '#/'),
-        navBtn('🔤', 'A-Z', '#/indice'),
-        navBtn('⚠️', `Interacciones${state.interactionIds.length ? ` (${state.interactionIds.length})` : ''}`, '#/interacciones'),
-        navBtn('★', 'Favoritos', '#/favoritos')),
+        navBtn('search', 'Buscar', '#/'),
+        navBtn('list', 'A-Z', '#/indice'),
+        navBtn('alert', `Interacciones${state.interactionIds.length ? ` (${state.interactionIds.length})` : ''}`, '#/interacciones'),
+        navBtn('star', 'Favoritos', '#/favoritos')),
       !STATIC && h('span', { class: 'who' }, state.user.username),
       !STATIC && h('button', { class: 'out', onclick: logout }, 'Salir')),
     h('main', {}, content,
@@ -57,9 +60,9 @@ function layout(...content) {
   ];
 }
 
-function navBtn(icon, label, hash) {
+function navBtn(iconName, label, hash) {
   const on = (location.hash || '#/') === hash;
-  return h('button', { class: on ? 'on' : '', onclick: () => go(hash) }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon), h('span', { class: 'lbl' }, label));
+  return h('button', { class: on ? 'on' : '', 'aria-current': on ? 'page' : null, onclick: () => go(hash) }, h('span', { class: 'ico' }, icon(iconName, { size: 22 })), h('span', { class: 'lbl' }, label));
 }
 
 function drugItem(d) {
@@ -69,7 +72,8 @@ function drugItem(d) {
       onkeydown: (e) => e.key === 'Enter' && go(`#/medicamento/${d.id}`) },
     h('div', {}, h('div', { class: 'name' }, d.generic), sub && h('div', { class: 'sub' }, sub)),
     h('button', { class: 'btn ghost', title: 'Añadir al comprobador de interacciones',
-      onclick: (e) => { e.stopPropagation(); addToInteractions(d); e.target.textContent = '✓'; } }, '+ Interacción'));
+      onclick: (e) => { e.stopPropagation(); addToInteractions(d); e.currentTarget.replaceChildren(icon('check', { size: 16 }), ' Añadido'); } },
+      icon('plus', { size: 16 }), ' Interacción'));
 }
 
 function addToInteractions(d) {
@@ -136,12 +140,27 @@ async function viewIndex(letter) {
   } catch (e) { showError(err, e); }
 }
 
+// Bloques de formatText() -> elementos del DOM (sin innerHTML). `hl` resalta las coincidencias de la busqueda.
+function renderBlocks(blocks, hl = (t) => t) {
+  return blocks.map((b) => {
+    if (b.type === 'h') {
+      return h('h4', { class: b.sub ? 'sec-sub' : 'sec-h' }, b.num ? h('span', { class: 'num' }, b.num) : '', hl(b.text));
+    }
+    if (b.type === 'ul') {
+      return h('ul', { class: 'sec-ul' }, b.items.map((i) => h('li', {}, i.label ? h('strong', {}, `${i.label}: `) : '', hl(i.text))));
+    }
+    const label = b.label === 'Tabla' ? 'Tabla (texto aplanado de la ficha)' : b.label;
+    return h('p', { class: b.label === 'Tabla' ? 'sec-table' : '' }, label ? h('strong', {}, `${label}: `) : '', hl(b.text));
+  });
+}
+
 async function viewDrug(id) {
   const body = h('div');
   app.replaceChildren(...layout(body));
   try {
     const d = await api(`/drugs/${id}`);
     const allTabs = [{ key: 'summary', title: 'Resumen' }, ...d.sections];
+    const names = [d.generic, ...d.brands, ...(d.substances || [])];
     let current = 'summary';
     let favorite = d.favorite;
     let query = '';
@@ -177,7 +196,9 @@ async function viewDrug(id) {
     let lang = 'en';
     const tcache = new Map();
     const notice = h('div', { class: 'tr-notice', role: 'status' });
-    const trBtn = h('button', { class: 'btn ghost', onclick: () => toggleLang() }, '🌐 Traducir al español');
+    const trBtn = h('button', { class: 'btn ghost', onclick: () => toggleLang() });
+    const paintTrBtn = () => trBtn.replaceChildren(icon(lang === 'es' ? 'undo' : 'translate', { size: 17 }), lang === 'es' ? ' Ver original (inglés)' : ' Traducir al español');
+    paintTrBtn();
     const show = (t) => (lang === 'es' && tcache.has(t) ? tcache.get(t) : t);
 
     // Textos que se ven ahora mismo (para traducir solo lo necesario)
@@ -208,7 +229,7 @@ async function viewDrug(id) {
         if (lang === 'es') notice.replaceChildren('Traducción automática del inglés: puede contener errores. El texto original de la ficha prevalece.');
       } catch (e) {
         lang = 'en';
-        trBtn.textContent = '🌐 Traducir al español';
+        paintTrBtn();
         notice.replaceChildren(h('div', { class: 'error', role: 'alert' }, e.message));
         paint(false);
       }
@@ -216,7 +237,7 @@ async function viewDrug(id) {
 
     function toggleLang() {
       lang = lang === 'es' ? 'en' : 'es';
-      trBtn.textContent = lang === 'es' ? '↩ Ver original (inglés)' : '🌐 Traducir al español';
+      paintTrBtn();
       paint();
     }
 
@@ -228,7 +249,7 @@ async function viewDrug(id) {
       const list = (b) => h('ul', {}, b.items.map((t) => h('li', {}, show(t))));
       const more = (b, key) => b.truncated && h('p', { class: 'muted' }, 'Hay más texto en la ficha. ', h('button', { class: 'link', onclick: jump(key) }, 'Ver sección completa'));
       return h('div', {},
-        sm.boxed && h('div', { class: 'qa boxed-qa' }, h('h3', {}, '⚠ Advertencia en recuadro'), list(sm.boxed), more(sm.boxed, 'boxed_warning')),
+        sm.boxed && h('div', { class: 'qa boxed-qa' }, h('h3', {}, icon('alert', { size: 18 }), ' Advertencia en recuadro'), list(sm.boxed), more(sm.boxed, 'boxed_warning')),
         h('div', { class: 'qa' }, h('h3', {}, 'Indicaciones'),
           sm.indications ? [list(sm.indications), more(sm.indications, 'indications')] : h('p', { class: 'muted' }, 'La ficha no incluye esta sección.')),
         h('div', { class: 'qa' }, h('h3', {}, 'Contraindicaciones'),
@@ -250,7 +271,7 @@ async function viewDrug(id) {
       favorite = !favorite;
       paintFav();
     } });
-    const paintFav = () => { favBtn.textContent = favorite ? '★ Favorito' : '☆ Añadir a favoritos'; };
+    const paintFav = () => favBtn.replaceChildren(icon(favorite ? 'star-fill' : 'star', { size: 17 }), favorite ? ' Favorito' : ' Añadir a favoritos');
     const paint = (translate = true) => {
       tabs.replaceChildren(...allTabs.map((s) => {
         const n = s.text ? count(show(s.text)) : 0;
@@ -261,7 +282,11 @@ async function viewDrug(id) {
       if (current === 'summary') content.replaceChildren(summaryView());
       else {
         const s = d.sections.find((x) => x.key === current);
-        content.replaceChildren(s ? h('div', { class: `content${s.key === 'boxed_warning' ? ' boxed' : ''}`, lang: lang === 'es' && tcache.has(s.text) ? 'es' : 'en' }, highlight(show(s.text))) : h('p', { class: 'muted' }, 'Sin información.'));
+        const translated = !!s && lang === 'es' && tcache.has(s.text);
+        content.replaceChildren(s
+          ? h('div', { class: `content${s.key === 'boxed_warning' ? ' boxed' : ''}`, lang: translated ? 'es' : 'en' },
+            renderBlocks(formatText(show(s.text), { structured: !translated, names }), highlight))
+          : h('p', { class: 'muted' }, 'Sin información.'));
       }
       if (translate) ensureTranslated();
     };
@@ -276,7 +301,7 @@ async function viewDrug(id) {
           h('div', {}, d.classes.map((c) => h('span', { class: 'tag' }, c)), d.routes.map((r) => h('span', { class: 'tag' }, `Vía: ${r}`))),
           d.manufacturer && h('div', { class: 'muted' }, `Fabricante de la ficha: ${d.manufacturer}`)),
         h('div', { class: 'actions' }, favBtn, ' ', trBtn, ' ',
-          h('button', { class: 'btn ghost', onclick: () => window.print() }, '🖨 Imprimir'), ' ',
+          h('button', { class: 'btn ghost', onclick: () => window.print() }, icon('printer', { size: 17 }), ' Imprimir'), ' ',
           h('button', { class: 'btn', onclick: () => { addToInteractions(d); go('#/interacciones'); } }, 'Comprobar interacciones'))),
       filter,
       notice,
@@ -370,7 +395,7 @@ function viewLogin() {
     setup && h('p', { class: 'muted' }, 'Primer uso: esta cuenta será tu usuario local (mínimo 8 caracteres).'),
     err,
     h('button', { class: 'btn', type: 'submit' }, setup ? 'Crear cuenta e iniciar sesión' : 'Iniciar sesión'));
-  app.replaceChildren(h('div', { class: 'login' }, h('h1', {}, '⚕ Farmacopea Local'), form,
+  app.replaceChildren(h('div', { class: 'login' }, h('h1', {}, icon('pill', { size: 28 }), ' Farmacopea Local'), form,
     h('p', { class: 'disclaimer' }, 'Cuenta local: tus credenciales se guardan solo en esta máquina (hash scrypt). Datos de openFDA.')));
 }
 

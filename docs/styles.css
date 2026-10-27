@@ -176,3 +176,27 @@ input[type="text"], input[type="search"], input[type="password"] { font-size: 16
 @media (display-mode: standalone) {
   .disclaimer { padding-bottom: .5rem; }
 }
+
+/* ===== Texto estructurado de las secciones ===== */
+.content { white-space: normal; line-height: 1.65; }
+.content p { margin: .55rem 0; }
+.content .sec-h { margin: 1.3rem 0 .4rem; font-size: 1.02rem; color: var(--brand-dark); border-bottom: 1px solid var(--line); padding-bottom: .25rem; }
+.content .sec-h:first-child, .content .sec-sub:first-child { margin-top: 0; }
+.content .sec-sub { margin: 1rem 0 .3rem; font-size: .95rem; }
+.content .num { display: inline-block; min-width: 2.2rem; margin-right: .4rem; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.content .sec-ul { margin: .5rem 0 .7rem 1.1rem; padding: 0; }
+.content .sec-ul li { margin: .35rem 0; }
+.content strong { color: var(--ink); }
+.content .sec-table { background: var(--bg); border-left: 3px solid var(--line); padding: .5rem .7rem; font-size: .92rem; border-radius: 4px; }
+
+/* ===== Iconos SVG minimalistas ===== */
+svg.icon { flex: none; vertical-align: -0.2em; }
+.btn, .link { display: inline-flex; align-items: center; gap: .35rem; }
+.btn.ghost svg.icon { color: var(--brand-dark); }
+.qa h3 { display: flex; align-items: center; gap: .4rem; }
+.logo { display: inline-flex; align-items: center; gap: .4rem; }
+.login h1 { display: flex; justify-content: center; align-items: center; gap: .5rem; }
+.topbar nav .ico { display: inline-flex; line-height: 0; font-size: 0; }
+.topbar nav button[aria-current="page"] svg.icon { stroke-width: 2.3; }
+.boxed-qa h3 svg.icon { color: var(--warn-line); }
+.topbar nav button { white-space: nowrap; }

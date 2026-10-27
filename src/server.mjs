@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { dirname, extname, join, normalize } from 'node:path';
+import { dirname, extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { db } from './db.mjs';
@@ -10,6 +10,7 @@ import { buildSummary } from '../shared/derive.mjs';
 import { translateTexts, translatorStatus } from './translate.mjs';
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
+const SHARED = join(dirname(fileURLToPath(import.meta.url)), '..', 'shared');
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
 const SESSION_MS = 1000 * 60 * 60 * 12;
@@ -17,8 +18,11 @@ const SESSION_MS = 1000 * 60 * 60 * 12;
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.webmanifest': 'application/manifest+json',
   '.ico': 'image/x-icon',
 };
 
@@ -279,8 +283,11 @@ async function api(req, res, url) {
 // ---------- estaticos ----------
 async function serveStatic(res, pathname) {
   const rel = normalize(decodeURIComponent(pathname === '/' ? '/index.html' : pathname));
-  const file = join(PUBLIC, rel);
-  if (!file.startsWith(PUBLIC)) throw new HttpError(403, 'Prohibido');
+  // /shared/* (modulos comunes con la version web) se sirven desde ../shared
+  const posix = rel.split(sep).join('/');
+  const isShared = posix.startsWith('/shared/');
+  const file = isShared ? join(SHARED, posix.slice('/shared/'.length)) : join(PUBLIC, rel);
+  if (!file.startsWith(isShared ? SHARED : PUBLIC)) throw new HttpError(403, 'Prohibido');
   try {
     const body = await readFile(file);
     send(res, 200, body, { 'Content-Type': MIME[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });

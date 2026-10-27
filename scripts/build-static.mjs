@@ -38,7 +38,7 @@ for (const d of drugs) {
 writeFileSync(join(out, 'data', 'index.json'), JSON.stringify(index));
 
 // ---- aplicacion ----
-const files = ['index.html', 'app.js', 'static-api.js', 'styles.css', 'manifest.webmanifest'];
+const files = ['index.html', 'app.js', 'icons.js', 'static-api.js', 'styles.css', 'manifest.webmanifest'];
 for (const f of files) cpSync(join(pub, f), join(out, f));
 cpSync(join(pub, 'icons'), join(out, 'icons'), { recursive: true });
 mkdirSync(join(out, 'shared'), { recursive: true });
@@ -49,8 +49,8 @@ writeFileSync(join(out, '.nojekyll'), '');
 // ---- service worker ----
 const version = new Date().toISOString().replace(/\D/g, '').slice(0, 12);
 const shell = [
-  './', './index.html', './app.js', './static-api.js', './styles.css', './config.js', './manifest.webmanifest',
-  './shared/derive.mjs', './shared/interactions-core.mjs', './shared/label.mjs',
+  './', './index.html', './app.js', './icons.js', './static-api.js', './styles.css', './config.js', './manifest.webmanifest',
+  './shared/derive.mjs', './shared/format.mjs', './shared/interactions-core.mjs', './shared/label.mjs',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './data/index.json',
 ];
 writeFileSync(
