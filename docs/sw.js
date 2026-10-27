@@ -1,5 +1,5 @@
 // Service worker: la app abre sin conexion. El build sustituye los marcadores de abajo (version y archivos).
-const VERSION = '202610271817';
+const VERSION = '202610271832';
 const SHELL = `shell-${VERSION}`;
 const DATA = 'data-v1';
 const SHELL_FILES = ["./","./index.html","./app.js","./static-api.js","./styles.css","./config.js","./manifest.webmanifest","./shared/derive.mjs","./shared/interactions-core.mjs","./shared/label.mjs","./icons/icon-192.png","./icons/icon-512.png","./icons/apple-touch-icon.png","./data/index.json"];

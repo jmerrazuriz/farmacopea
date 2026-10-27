@@ -10,6 +10,7 @@
     "seed": "node --disable-warning=ExperimentalWarning scripts/seed.mjs",
     "build:web": "node --disable-warning=ExperimentalWarning scripts/build-static.mjs",
     "pretranslate": "node --disable-warning=ExperimentalWarning scripts/pretranslate.mjs",
+    "revalidate-es": "node --disable-warning=ExperimentalWarning scripts/revalidate-es.mjs",
     "translator:install": ".venv\\Scripts\\python scripts/translator.py --install",
     "translator": ".venv\\Scripts\\python scripts/translator.py"
   }
