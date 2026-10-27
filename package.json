@@ -1,0 +1,16 @@
+{
+  "name": "farmacopea-local",
+  "version": "1.0.0",
+  "description": "Consulta local de informacion de medicamentos con datos abiertos (openFDA)",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.mjs",
+    "seed": "node --disable-warning=ExperimentalWarning scripts/seed.mjs",
+    "build:web": "node --disable-warning=ExperimentalWarning scripts/build-static.mjs",
+    "pretranslate": "node --disable-warning=ExperimentalWarning scripts/pretranslate.mjs",
+    "translator:install": ".venv\\Scripts\\python scripts/translator.py --install",
+    "translator": ".venv\\Scripts\\python scripts/translator.py"
+  }
+}

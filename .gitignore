@@ -1,0 +1,17 @@
+# Datos locales (cuentas de usuario, base SQLite, registros)
+data/
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# Entorno de Python del traductor local (se recrea con las instrucciones del README)
+.venv/
+
+# Dependencias y sistema
+node_modules/
+.DS_Store
+Thumbs.db
+.claude/
+.env
+.env.*
